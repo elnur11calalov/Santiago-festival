@@ -726,6 +726,8 @@
     say($("#cm"), "Xəta: " + e.message);
   }
 };
+      $("#allgroups").onclick = async (e) => {
+        let id = e.target.dataset.h;
         if (!id) return;
         let z = await getDoc(doc(db, "groups", id));
         $("#details").classList.remove("hidden");
