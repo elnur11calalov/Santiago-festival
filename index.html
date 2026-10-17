@@ -345,7 +345,7 @@
         </section>
         <section id="about" class="page">
           <div class="card" style="text-align: center">
-            <img class="logo" src="media/Santiago_loqo.jpeg" />
+            <img class="logo" src="media/Santiago_logo.jpeg" />
             <h1>Santiago Book Club</h1>
             <p class="muted">2023-cü ildən bəri sizinlə 📚</p>
           </div>
@@ -704,27 +704,28 @@
         );
       };
       $("#newgroup").onclick = async () => {
-        let n = $("#newname").value.trim();
-        if (!n) return;
-        let c = crypto
-            .randomUUID()
-            .replaceAll("-", "")
-            .slice(0, 6)
-            .toUpperCase(),
-          r = doc(collection(db, "groups")),
-          b = writeBatch(db);
-        b.set(r, {
-          name: n,
-          code: c,
-          createdAt: serverTimestamp(),
-          createdBy: u.uid,
-        });
-        b.set(doc(db, "groupCodes", c), { groupId: r.id });
-        await b.commit();
-        say($("#cm"), "Qrup yaradıldı. Kod: <b>" + c + "</b>", "ok");
-      };
-      $("#allgroups").onclick = async (e) => {
-        let id = e.target.dataset.h;
+  try {
+    let n = $("#newname").value.trim();
+    if (!n) return say($("#cm"), "Qrup adını yazın.");
+
+    let c = crypto.randomUUID().replaceAll("-", "").slice(0, 6).toUpperCase();
+    let r = doc(collection(db, "groups"));
+    let b = writeBatch(db);
+
+    b.set(r, {
+      name: n,
+      code: c,
+      createdAt: serverTimestamp(),
+      createdBy: u.uid,
+    });
+    b.set(doc(db, "groupCodes", c), { groupId: r.id });
+
+    await b.commit();
+    say($("#cm"), "Qrup yaradıldı. Kod: " + c, "ok");
+  } catch (e) {
+    say($("#cm"), "Xəta: " + e.message);
+  }
+};
         if (!id) return;
         let z = await getDoc(doc(db, "groups", id));
         $("#details").classList.remove("hidden");
