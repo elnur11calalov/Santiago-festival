@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="az">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Santiago Book Club</title>
+    <style>
+      :root {
+        --b: #fff8e9;
+        --p: #fffdf7;
+        --i: #352d25;
+        --m: #786d60;
+        --y: #f7c84b;
+        --o: #df8746;
+        --l: #eadcc8;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--b);
+        color: var(--i);
+        font: 16px system-ui;
+      }
+      .app {
+        max-width: 700px;
+        margin: auto;
+        padding: 18px 14px 94px;
+        min-height: 100vh;
+      }
+      .top,
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 9px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 800;
+      }
+      .logo,
+      .avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #eee;
+      }
+      .avatar {
+        width: 30px;
+        height: 30px;
+      }
+      .card,
+      .item {
+        background: var(--p);
+        border: 1px solid var(--l);
+        border-radius: 17px;
+        padding: 15px;
+        margin-top: 14px;
+      }
+      .item {
+        margin: 0;
+        border-radius: 12px;
+        background: #fff;
+      }
+      .list {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+      .hidden {
+        display: none !important;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 7px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 0 0 8px;
+      }
+      .muted,
+      .meta {
+        color: var(--m);
+        font-size: 13px;
+      }
+      .big {
+        font-size: 38px;
+        color: var(--o);
+        font-weight: 800;
+      }
+      .btn {
+        border: 0;
+        border-radius: 11px;
+        padding: 10px 12px;
+        background: var(--y);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .secondary {
+        background: #f4e8d4;
+      }
+      .danger {
+        background: #fff0ee;
+        color: #a33;
+      }
+      .small {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        font: inherit;
+        padding: 10px;
+        border: 1px solid var(--l);
+        border-radius: 10px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        margin: 10px 0 4px;
+      }
+      .message {
+        margin-top: 9px;
+        padding: 9px;
+        background: #fff0ee;
+        color: #91352c;
+        border-radius: 9px;
+        font-size: 13px;
+      }
+      .ok {
+        background: #eff9e9;
+        color: #376027;
+      }
+      .emoji {
+        border: 1px solid var(--l);
+        background: #fff;
+        font-size: 19px;
+        border-radius: 8px;
+        padding: 5px;
+        margin: 2px;
+      }
+      .selected {
+        border-color: var(--o);
+        background: #fff0d4;
+      }
+      .nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fffdf7f2;
+        border-top: 1px solid var(--l);
+      }
+      .nav div {
+        display: flex;
+        justify-content: space-around;
+        max-width: 700px;
+        margin: auto;
+      }
+      .nav button {
+        border: 0;
+        background: transparent;
+        padding: 10px 5px;
+        font-size: 12px;
+        color: var(--m);
+      }
+      .nav button.active {
+        font-weight: bold;
+        color: #805000;
+      }
+      .chat {
+        max-height: 350px;
+        overflow: auto;
+      }
+      .bubble {
+        padding: 8px;
+        background: #fff;
+        border: 1px solid var(--l);
+        border-radius: 4px 10px 10px 10px;
+        margin-left: 38px;
+      }
+      .footer {
+        text-align: center;
+        color: var(--m);
+        font-size: 12px;
+        margin-top: 25px;
+      }
+      .qr {
+        max-width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--l);
+      }
+      a {
+        color: #8a5410;
+      }
+      @media (max-width: 400px) {
+        .app {
+          padding-inline: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <div class="brand">
+          <img class="logo" src="media/Santiago_loqo.jpeg" /><span
+            >Santiago Book Club</span
+          >
+        </div>
+        <span id="user"></span>
+      </header>
+      <section id="login" class="card">
+        <h1>Könüllü paneli</h1>
+        <p class="muted">
+          Bakı Beynəlxalq Kitab Sərgisində yeni oxucuları klubumuza dəvət edin.
+        </p>
+        <button id="in" class="btn">Google ilə daxil ol</button>
+        <div id="loginMsg"></div>
+      </section>
+      <div id="app" class="hidden">
+        <section id="inv" class="page active">
+          <div class="card row">
+            <span
+              ><h1>Dəvətlərim</h1>
+              <span id="gname" class="muted">Əvvəlcə qrupa qoşulun</span></span
+            ><span><b id="count" class="big">0</b><small> toplam</small></span>
+          </div>
+          <div id="formArea" class="hidden">
+            <form id="form" class="card">
+              <h2 id="ft">Yeni dəvət</h2>
+              <label>Ad *</label><input id="fn" required /><label>Soyad *</label
+              ><input id="ln" required /><label>Telefon *</label
+              ><input id="ph" required inputmode="numeric" /><label
+                >Əlavə qeyd</label
+              ><textarea id="note"></textarea><label>İkon</label>
+              <div id="em"></div>
+              <button class="btn" id="save">Əlavə et</button>
+              <button type="button" id="cancel" class="btn secondary hidden">
+                Ləğv et
+              </button>
+              <div id="fm"></div>
+            </form>
+            <div class="card">
+              <h2>Qeydlərim</h2>
+              <div id="mine" class="list"></div>
+            </div>
+          </div>
+          <div id="nogroup" class="card muted">
+            Dəvət əlavə etmək üçün “Qruplar” bölməsində kodla qoşulun.
+          </div>
+        </section>
+        <section id="groups" class="page">
+          <div class="card">
+            <h1>Qruplar</h1>
+            <p class="muted">Bir neçə qrupa qoşula bilərsiniz.</p>
+            <div class="row">
+              <input id="code" placeholder="Qrup kodu" /><button
+                id="join"
+                class="btn"
+              >
+                Qoşul
+              </button>
+            </div>
+            <div id="jm"></div>
+          </div>
+          <div class="card">
+            <h2>Qruplarım</h2>
+            <div id="groupsList" class="list"></div>
+          </div>
+          <div id="room" class="hidden card">
+            <div class="row">
+              <span
+                ><h2 id="rn"></h2>
+                <span id="rc" class="muted"></span></span
+              ><button id="close" class="btn secondary small">Bağla</button>
+            </div>
+            <button id="lead" class="btn small">Liderlik</button>
+            <button id="cht" class="btn secondary small">Çat</button>
+            <div id="board" class="list"></div>
+            <div id="chat" class="hidden">
+              <div id="msgs" class="list chat"></div>
+              <form id="send" class="row">
+                <input
+                  id="text"
+                  required
+                  maxlength="1000"
+                  placeholder="Mesaj yazın"
+                /><button class="btn">Göndər</button>
+              </form>
+            </div>
+          </div>
+        </section>
+        <section id="host" class="page">
+          <div id="gate" class="card">
+            <h1>Host paneli</h1>
+            <input id="pass" type="password" placeholder="Giriş kodu" /><button
+              id="open"
+              class="btn"
+            >
+              Paneli aç
+            </button>
+            <div id="hm"></div>
+          </div>
+          <div id="hp" class="hidden">
+            <div class="card">
+              <h2>Yeni qrup</h2>
+              <div class="row">
+                <input id="newname" placeholder="Qrup adı" /><button
+                  id="newgroup"
+                  class="btn"
+                >
+                  Yarat
+                </button>
+              </div>
+              <div id="cm"></div>
+            </div>
+            <div class="card">
+              <h2>Bütün qruplar</h2>
+              <div id="allgroups" class="list"></div>
+            </div>
+            <div id="details" class="hidden card">
+              <h2 id="dn"></h2>
+              <div id="members" class="list"></div>
+              <h2>Dəvətlər</h2>
+              <div id="allinv" class="list"></div>
+              <h2>Çat</h2>
+              <div id="allmsg" class="list"></div>
+            </div>
+          </div>
+        </section>
+        <section id="about" class="page">
+          <div class="card" style="text-align: center">
+            <img class="logo" src="media/Santiago_loqo.jpeg" />
+            <h1>Santiago Book Club</h1>
+            <p class="muted">2023-cü ildən bəri sizinlə 📚</p>
+          </div>
+          <div class="card">
+            <h2>12-ci Bakı Beynəlxalq Kitab Sərgisi</h2>
+            <p>📍 Bakı Ekspo Mərkəzi<br />📅 21–27 Oktyabr 2026</p>
+            <p class="muted">
+              Mədəniyyət Nazirliyinin təşkilatçılığı ilə keçirilən sərgidə
+              Santiago Book Club da öz könüllüləri ilə iştirak edir. Stendimizə
+              gəlin, klubumuzla tanış olun!
+            </p>
+          </div>
+          <div class="card">
+            🔹 Aylıq və növbədənkənar kitab müzakirələri<br /><br />🔹
+            Yazıçılarla görüşlər<br /><br />🔹 Film və tamaşa müzakirələri<!-- Klubun digər xüsusiyyətlərini buraya yeni sətir kimi əlavə edin. -->
+            <p class="muted">
+              Klub haqqında digər xüsusiyyətlər tezliklə əlavə olunacaq.
+            </p>
+            Əlaqə: <a href="https://wa.me/994773354353">+994 77 335 43 53</a>
+          </div>
+          <div class="card">
+            <h2>Linklər</h2>
+            <div id="links"></div>
+          </div>
+          <div class="card">
+            <h2>QR kodlar</h2>
+            <div id="qrs"></div>
+          </div>
+        </section>
+      </div>
+      <p class="footer">
+        Daxil edilən məlumatlar yalnız Santiago Book Club'u üçün istifadə
+        olunur.
+      </p>
+    </main>
+    <nav class="nav">
+      <div>
+        <button class="active" data="inv">Dəvətlərim</button
+        ><button data="groups">Qruplar</button><button data="host">Host</button
+        ><button data="about">Klub haqqında</button>
+      </div>
+    </nav>
+    <script type="module">
+      /* ===== FIREBASE AÇARLARINI BURAYA YAZIN ===== */ const firebaseConfig =
+        {
+          apiKey: "AIzaSyAGU9jDxcVpOEs9ZCEl4beaOZ6ns_TfucU",
+          authDomain: "santiago-festival.firebaseapp.com",
+          projectId: "santiago-festival",
+          storageBucket: "santiago-festival.firebasestorage.app",
+          messagingSenderId: "243013162366",
+          appId: "1:243013162366:web:64c04cac44e47016324f2f",
+        };
+      const HOST_EMAILS = ["elnur11calalov@gmail.com"];
+      const HOST_HASH =
+        "fed817ddf695446581aa2a2f04fb2f56c4093e92e9e3f154ddbc580f1e0257b1"; // Yeni link üçün sətri köçürüb ad, link və ikonu dəyişin.
+      const LINKS = [
+        {
+          ad: "Instagram",
+          link: "https://www.instagram.com/santiagobookclub",
+          ikon: "📸",
+        },
+        {
+          ad: "Linktree",
+          link: "https://linktr.ee/santiagobookclub",
+          ikon: "🔗",
+        },
+        {
+          ad: "Üzvlük formu",
+          link: "https://docs.google.com/forms/d/e/1FAIpQLSfbiyHKFOwlWpdGw4Ybr0O3DaitBYB6hLit2cQFr8WIdNFr5A/viewform",
+          ikon: "📝",
+        },
+      ];
+      const QR_SEKILLER = [{ ad: "Üzvlük", sekil: "media/qr-uzvluk.png" }]; // Yeni QR üçün sətri köçürüb ad və şəkil yolunu dəyişin.
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import {
+        getAuth,
+        GoogleAuthProvider,
+        signInWithPopup,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+      import {
+        getFirestore,
+        collection,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        deleteDoc,
+        addDoc,
+        onSnapshot,
+        query,
+        where,
+        orderBy,
+        serverTimestamp,
+        writeBatch,
+        increment,
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+      const $ = (x) => document.querySelector(x),
+        E = ["📚", "🌿", "✨", "☕", "🌻", "🎈", "🦋", "🌙", "🎉", "🧡"],
+        S = (x) =>
+          String(x ?? "").replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+      let db,
+        au,
+        u,
+        g,
+        edit,
+        ico = E[0],
+        my = [],
+        off = [];
+      const C = (id) => collection(db, "groups", id, "invites"),
+        M = (id) => collection(db, "groups", id, "members"),
+        T = (id) => collection(db, "groups", id, "stats"),
+        X = (id) => collection(db, "groups", id, "messages"),
+        host = () => u && HOST_EMAILS.includes((u.email || "").toLowerCase()),
+        say = (x, t, k = "") =>
+          (x.innerHTML = t ? `<div class="message ${k}">${t}</div>` : ""),
+        stop = () => {
+          off.forEach((x) => x());
+          off = [];
+        },
+        tm = (x) =>
+          x?.toDate
+            ? x
+                .toDate()
+                .toLocaleTimeString("az-AZ", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+            : "…";
+      function icons() {
+        $("#em").innerHTML = E.map(
+          (x) =>
+            `<button type="button" data-e="${x}" class="emoji ${x == ico ? "selected" : ""}">${x}</button>`,
+        ).join("");
+      }
+      function mine() {
+        $("#count").textContent = my.length;
+        $("#mine").innerHTML =
+          my
+            .map(
+              (x) =>
+                `<div class="item row"><span><b>${x.emoji} ${S(x.firstName)} ${S(x.lastName)}</b><div class="meta">${S(x.phone)} · ${S(x.note || "")}</div></span><span><button class="btn small secondary" data-e="${x.id}">Redaktə</button> <button class="btn small danger" data-d="${x.id}">Sil</button></span></div>`,
+            )
+            .join("") || '<span class="muted">Hələ dəvət yoxdur.</span>';
+      }
+      function watch() {
+        off.push(
+          onSnapshot(query(C(g.id), where("volunteerId", "==", u.uid)), (s) => {
+            my = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+            mine();
+          }),
+          onSnapshot(
+            query(T(g.id), orderBy("count", "desc")),
+            (s) =>
+              ($("#board").innerHTML = s.docs
+                .map((d, i) => {
+                  let x = d.data();
+                  return `<div class="item row"><b>${["🥇", "🥈", "🥉"][i] || i + 1 + "."}</b><img class="avatar" src="${S(x.photoURL || "")}"><span style="flex:1">${S(x.displayName)}</span><b>${x.count}</b></div>`;
+                })
+                .join("")),
+          ),
+          onSnapshot(query(X(g.id), orderBy("createdAt", "asc")), (s) => {
+            $("#msgs").innerHTML = s.docs
+              .map((d) => {
+                let x = d.data();
+                return `<div class="bubble"><b>${S(x.senderName)}</b><div>${S(x.text)}</div><small class="meta">${tm(x.createdAt)}</small></div>`;
+              })
+              .join("");
+          }),
+        );
+      }
+      function use(x) {
+        stop();
+        g = x;
+        $("#gname").textContent = x.name;
+        $("#formArea").classList.remove("hidden");
+        $("#nogroup").classList.add("hidden");
+        $("#room").classList.remove("hidden");
+        $("#rn").textContent = x.name;
+        $("#rc").textContent = "Kod: " + x.code;
+        watch();
+      }
+      async function join() {
+        let c = $("#code").value.trim().toUpperCase(),
+          r = await getDoc(doc(db, "groupCodes", c));
+        if (!r.exists()) return say($("#jm"), "Bu qrup kodu tapılmadı.");
+        let id = r.data().groupId,
+          z = await getDoc(doc(db, "groups", id));
+        let x = { id, name: z.data().name, code: c },
+          b = writeBatch(db);
+        b.set(
+          doc(M(id), u.uid),
+          {
+            displayName: u.displayName || "Könüllü",
+            photoURL: u.photoURL || "",
+            joinedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+        b.set(
+          doc(T(id), u.uid),
+          {
+            displayName: u.displayName || "Könüllü",
+            photoURL: u.photoURL || "",
+            count: 0,
+          },
+          { merge: true },
+        );
+        b.set(doc(db, "users", u.uid, "groups", id), x);
+        await b.commit();
+        use(x);
+      }
+      $("#in").onclick = () =>
+        signInWithPopup(au, new GoogleAuthProvider()).catch((e) =>
+          say($("#loginMsg"), S(e.message)),
+        );
+      $("#em").onclick = (e) => {
+        if (e.target.dataset.e) {
+          ico = e.target.dataset.e;
+          icons();
+        }
+      };
+      $("#form").onsubmit = async (e) => {
+        e.preventDefault();
+        let p = $("#ph").value.replace(/\D/g, "").slice(-9);
+        if (p.length != 9)
+          return say($("#fm"), "Telefonun son 9 rəqəmini yazın.");
+        let d = {
+          firstName: $("#fn").value.trim(),
+          lastName: $("#ln").value.trim(),
+          phone: p,
+          note: $("#note").value.trim(),
+          emoji: ico,
+        };
+        if (edit) await updateDoc(doc(C(g.id), edit), d);
+        else {
+          let r = doc(C(g.id), p);
+          if ((await getDoc(r)).exists())
+            return say($("#fm"), "Bu nömrə artıq əlavə olunub.");
+          let b = writeBatch(db);
+          b.set(r, {
+            ...d,
+            volunteerId: u.uid,
+            volunteerName: u.displayName || "",
+            createdAt: serverTimestamp(),
+          });
+          b.update(doc(T(g.id), u.uid), { count: increment(1) });
+          await b.commit();
+        }
+        edit = null;
+        $("#form").reset();
+        $("#ph").disabled = false;
+        $("#cancel").classList.add("hidden");
+      };
+      $("#mine").onclick = async (e) => {
+        let id = e.target.dataset.d || e.target.dataset.e;
+        if (!id) return;
+        if (e.target.dataset.d) {
+          let b = writeBatch(db);
+          b.delete(doc(C(g.id), id));
+          b.update(doc(T(g.id), u.uid), { count: increment(-1) });
+          return b.commit();
+        }
+        let x = my.find((a) => a.id == id);
+        edit = id;
+        ["fn", "ln", "ph", "note"].forEach(
+          (k) =>
+            ($("#" + k).value =
+              x[
+                { fn: "firstName", ln: "lastName", ph: "phone", note: "note" }[
+                  k
+                ]
+              ] || ""),
+        );
+        $("#ph").disabled = true;
+        ico = x.emoji;
+        icons();
+        $("#cancel").classList.remove("hidden");
+      };
+      $("#cancel").onclick = () => {
+        edit = null;
+        $("#form").reset();
+        $("#ph").disabled = false;
+        $("#cancel").classList.add("hidden");
+      };
+      $("#join").onclick = () =>
+        join().catch((e) => say($("#jm"), S(e.message)));
+      $("#groupsList").onclick = async (e) => {
+        let id = e.target.dataset.g;
+        if (id) {
+          let d = await getDoc(doc(db, "users", u.uid, "groups", id));
+          use({ id, ...d.data() });
+        }
+      };
+      $("#close").onclick = () => {
+        $("#room").classList.add("hidden");
+        stop();
+      };
+      $("#lead").onclick = () => {
+        $("#board").classList.remove("hidden");
+        $("#chat").classList.add("hidden");
+      };
+      $("#cht").onclick = () => {
+        $("#board").classList.add("hidden");
+        $("#chat").classList.remove("hidden");
+      };
+      $("#send").onsubmit = async (e) => {
+        e.preventDefault();
+        let t = $("#text").value.trim();
+        if (t) {
+          await addDoc(X(g.id), {
+            text: t,
+            senderId: u.uid,
+            senderName: u.displayName || "Könüllü",
+            senderPhoto: u.photoURL || "",
+            createdAt: serverTimestamp(),
+          });
+          $("#text").value = "";
+        }
+      };
+      async function sha(x) {
+        let b = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(x),
+        );
+        return [...new Uint8Array(b)]
+          .map((x) => x.toString(16).padStart(2, "0"))
+          .join("");
+      }
+      $("#open").onclick = async () => {
+        if ((await sha($("#pass").value)) !== HOST_HASH)
+          return say($("#hm"), "Kod düzgün deyil.");
+        if (!host()) return say($("#hm"), "Bu hesab host deyil.");
+        $("#gate").classList.add("hidden");
+        $("#hp").classList.remove("hidden");
+        onSnapshot(
+          collection(db, "groups"),
+          (s) =>
+            ($("#allgroups").innerHTML = s.docs
+              .map(
+                (d) =>
+                  `<div class="item row"><span><b>${S(d.data().name)}</b><div class="meta">Kod: ${d.data().code}</div></span><button class="btn small" data-h="${d.id}">Bax</button></div>`,
+              )
+              .join("")),
+        );
+      };
+      $("#newgroup").onclick = async () => {
+        let n = $("#newname").value.trim();
+        if (!n) return;
+        let c = crypto
+            .randomUUID()
+            .replaceAll("-", "")
+            .slice(0, 6)
+            .toUpperCase(),
+          r = doc(collection(db, "groups")),
+          b = writeBatch(db);
+        b.set(r, {
+          name: n,
+          code: c,
+          createdAt: serverTimestamp(),
+          createdBy: u.uid,
+        });
+        b.set(doc(db, "groupCodes", c), { groupId: r.id });
+        await b.commit();
+        say($("#cm"), "Qrup yaradıldı. Kod: <b>" + c + "</b>", "ok");
+      };
+      $("#allgroups").onclick = async (e) => {
+        let id = e.target.dataset.h;
+        if (!id) return;
+        let z = await getDoc(doc(db, "groups", id));
+        $("#details").classList.remove("hidden");
+        $("#dn").textContent = z.data().name;
+        onSnapshot(
+          M(id),
+          (s) =>
+            ($("#members").innerHTML =
+              `<span class="muted">Üzvlər: ${s.size}</span>` +
+              s.docs
+                .map(
+                  (d) => `<div class="item">${S(d.data().displayName)}</div>`,
+                )
+                .join("")),
+        );
+        onSnapshot(
+          query(C(id), orderBy("createdAt", "desc")),
+          (s) =>
+            ($("#allinv").innerHTML = s.docs
+              .map((d) => {
+                let x = d.data();
+                return `<div class="item">${x.emoji} <b>${S(x.firstName)} ${S(x.lastName)}</b><div class="meta">${S(x.phone)} · ${S(x.volunteerName)}</div></div>`;
+              })
+              .join("")),
+        );
+        onSnapshot(
+          query(X(id), orderBy("createdAt", "asc")),
+          (s) =>
+            ($("#allmsg").innerHTML = s.docs
+              .map(
+                (d) =>
+                  `<div class="item"><b>${S(d.data().senderName)}</b>: ${S(d.data().text)}</div>`,
+              )
+              .join("")),
+        );
+      };
+      document.querySelectorAll(".nav button").forEach(
+        (b) =>
+          (b.onclick = () => {
+            document
+              .querySelectorAll(".nav button")
+              .forEach((x) => x.classList.toggle("active", x == b));
+            document
+              .querySelectorAll(".page")
+              .forEach((x) =>
+                x.classList.toggle("active", x.id == b.dataset.data),
+              );
+          }),
+      );
+      $("#links").innerHTML = LINKS.map(
+        (x) =>
+          `<p><a class="btn secondary" href="${x.link}" target="_blank">${x.ikon} ${x.ad}</a></p>`,
+      ).join("");
+      $("#qrs").innerHTML = QR_SEKILLER.map(
+        (x) => `<p><b>${x.ad}</b><br><img class="qr" src="${x.sekil}"></p>`,
+      ).join("");
+      let app = initializeApp(firebaseConfig);
+      au = getAuth(app);
+      db = getFirestore(app);
+      onAuthStateChanged(au, (x) => {
+        u = x;
+        $("#login").classList.toggle("hidden", !!x);
+        $("#app").classList.toggle("hidden", !x);
+        $("#user").innerHTML = x
+          ? `<button id="out" class="btn secondary small">Çıxış</button>`
+          : "";
+        if (x) {
+          $("#out").onclick = () => signOut(au);
+          onSnapshot(
+            collection(db, "users", x.uid, "groups"),
+            (s) =>
+              ($("#groupsList").innerHTML =
+                s.docs
+                  .map(
+                    (d) =>
+                      `<div class="item row"><span>${S(d.data().name)}<div class="meta">${S(d.data().code)}</div></span><button class="btn small" data-g="${d.id}">Aç</button></div>`,
+                  )
+                  .join("") || '<span class="muted">Hələ qrup yoxdur.</span>'),
+          );
+        }
+      });
+      icons();
+    </script>
+  </body>
+</html>

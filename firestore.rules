@@ -1,0 +1,80 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Bu siyahı index.html faylındakı HOST_EMAILS ilə eyni olmalıdır.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function host() {
+      return signedIn()
+        && request.auth.token.email in ['elnur11calalov@gmail.com'];
+    }
+
+    function member(groupId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/groups/$(groupId)/members/$(request.auth.uid));
+    }
+
+    // Könüllü qrup kodunu daxil etdikdə qrupun ID-sini buradan tapır.
+    match /groupCodes/{code} {
+      allow get: if signedIn();
+      allow create: if host();
+    }
+
+    // Hər istifadəçi yalnız öz qoşulduğu qrupların siyahısını oxuyur.
+    match /users/{uid}/groups/{groupId} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /groups/{groupId} {
+      allow create: if host();
+
+      // Qrupa qoşularkən yalnız qrup adı üçün birbaşa oxuma edilir.
+      allow get: if signedIn();
+      allow list: if host();
+
+      match /members/{uid} {
+        allow read: if host() || member(groupId);
+        allow create: if signedIn() && request.auth.uid == uid;
+        allow update, delete: if false;
+      }
+
+      // Liderlik cədvəli üçün hər üzvün dəvət sayı.
+      match /stats/{uid} {
+        allow read: if host() || member(groupId);
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.count == 0;
+        allow update: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count']);
+      }
+
+      match /invites/{phoneId} {
+        allow create: if member(groupId)
+          && request.resource.data.volunteerId == request.auth.uid
+          && phoneId.matches('^[0-9]{9}$');
+        allow read: if host()
+          || (signedIn() && resource.data.volunteerId == request.auth.uid);
+        allow update: if signedIn()
+          && resource.data.volunteerId == request.auth.uid
+          && request.resource.data.volunteerId == resource.data.volunteerId
+          && request.resource.data.phone == resource.data.phone;
+        allow delete: if signedIn()
+          && resource.data.volunteerId == request.auth.uid;
+      }
+
+      match /messages/{messageId} {
+        allow read: if host() || member(groupId);
+        allow create: if member(groupId)
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000;
+        allow update, delete: if false;
+      }
+    }
+  }
+}
