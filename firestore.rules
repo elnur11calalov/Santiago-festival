@@ -9,7 +9,10 @@ service cloud.firestore {
 
     function host() {
       return signedIn()
-        && request.auth.token.email in ['elnur11calalov@gmail.com'];
+  && request.auth.token.email in [
+    'elnur11calalov@gmail.com',
+    'Arustmov0@gmail.com',
+  ];
     }
 
     function member(groupId) {
