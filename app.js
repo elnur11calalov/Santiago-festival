@@ -31,7 +31,11 @@ const firebaseConfig = {
   messagingSenderId: "243013162366",
   appId: "1:243013162366:web:64c04cac44e47016324f2f",
 };
-const HOST_EMAIL = "elnur11calalov@gmail.com";
+// Yeni host əlavə etmək üçün e-poçtu bu siyahıya kiçik hərflərlə yazın.
+const HOST_EMAILS = [
+  "elnur11calalov@gmail.com",
+  "Arustmov0@gmail.com"
+];
 const $ = (s) => document.querySelector(s);
 const icons = ["📚", "🌿", "✨", "☕", "🌻", "🎈", "🦋", "🌙", "🎉", "🧡"];
 const esc = (x) =>
@@ -58,7 +62,7 @@ let stopHost = () => {};
 let stopDetails = () => {};
 
 function isHost() {
-  return user?.email?.toLowerCase() === HOST_EMAIL;
+  return HOST_EMAILS.includes(user?.email?.toLowerCase());
 }
 function renderIcons() {
   $("#emojis").innerHTML = icons
