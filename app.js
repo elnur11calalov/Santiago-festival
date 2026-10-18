@@ -261,18 +261,24 @@ $("#inviteForm").onsubmit = async (e) => {
   if (phone.length !== 9)
     return say("#inviteMessage", "Telefonun son 9 rəqəmini yazın.");
   const inviteRef = doc(db, "groups", activeGroup.id, "invites", phone);
-  if ((await getDoc(inviteRef)).exists())
-    return say("#inviteMessage", "Bu nömrə artıq əlavə olunub.");
-  await setDoc(inviteRef, {
-    firstName: $("#firstName").value.trim(),
-    lastName: $("#lastName").value.trim(),
-    phone,
-    note: $("#note").value.trim(),
-    icon: selectedIcon,
-    volunteerId: user.uid,
-    volunteerName: user.displayName || "Könüllü",
-    createdAt: serverTimestamp(),
-  });
+  try {
+    // Firestore qaydası yalnız öz dəvətlərini oxumağa icazə verir.
+    // Buna görə əvvəlcədən getDoc() ilə yoxlama etmirik: yeni sənəd birbaşa yaradılır.
+    await setDoc(inviteRef, {
+      firstName: $("#firstName").value.trim(),
+      lastName: $("#lastName").value.trim(),
+      phone,
+      note: $("#note").value.trim(),
+      icon: selectedIcon,
+      volunteerId: user.uid,
+      volunteerName: user.displayName || "Könüllü",
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    if (error.code === "permission-denied")
+      return say("#inviteMessage", "Bu nömrə artıq əlavə olunub.");
+    return say("#inviteMessage", "Dəvət əlavə edilərkən xəta baş verdi.");
+  }
   const stat = doc(db, "groups", activeGroup.id, "stats", user.uid);
   const old = await getDoc(stat);
   await setDoc(
@@ -350,6 +356,11 @@ $("#hostGroups").onclick = async (e) => {
   const id = e.target.dataset.remove;
   if (!id) return;
   const group = await getDoc(doc(db, "groups", id));
+  const groupName = group.data()?.name || "bu qrup";
+  const confirmed = window.confirm(
+    `“${groupName}” qrupunu silmək istədiyinizə əminsiniz? Qrup kodu dərhal işləməyəcək.`,
+  );
+  if (!confirmed) return;
   await updateDoc(doc(db, "groups", id), { active: false });
   await deleteDoc(doc(db, "groupCodes", group.data().code));
   if (activeGroup?.id === id) {
